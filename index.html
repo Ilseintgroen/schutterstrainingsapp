@@ -51,11 +51,36 @@ label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:4px}
 @media (max-width:759px) and (orientation:portrait){.rotate-note{display:block}}
 footer{text-align:center;color:var(--muted);font-size:.75rem;padding:0 15px 22px}
 @media(min-width:760px){main{grid-template-columns:1.2fr .8fr;align-items:start}.wide{grid-column:1/-1}.scores{grid-template-columns:repeat(4,1fr)}}
+
+/* Telefoon: aparte startpagina en compacte trainingsweergave in liggende stand */
+@media (max-width:759px) and (orientation:landscape){
+  #trainingPage{grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);height:calc(100dvh - 48px);overflow:hidden}
+  #trainingPage > section:nth-of-type(n+3){display:none}
+  #trainingPage > section:nth-of-type(1),#trainingPage > section:nth-of-type(2){min-width:0;min-height:0;overflow-y:auto}
+  #trainingPage > section:nth-of-type(1){grid-column:1;grid-row:1}
+  #trainingPage > section:nth-of-type(2){grid-column:2;grid-row:1}
+  .pyramid-row .rowname{width:34px}
+  .cell{aspect-ratio:1.5;font-size:clamp(.9rem,2.8vh,1.2rem)}
+  .cell .cell-score{font-size:clamp(1rem,3.2vh,1.35rem);font-weight:900}
+  .cell .cell-number{font-size:.7rem}
+  .scores{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+  .scorebtn{min-height:clamp(34px,7.2vh,46px);padding:4px 2px;font-size:clamp(.85rem,2.2vh,1rem)}
+  .stat b{font-size:clamp(.9rem,2.5vh,1.1rem)}
+  .stat span{font-size:.62rem}
+  .legend{font-size:.65rem;gap:6px}
+  #trainingPage > section:nth-of-type(2) .small{font-size:.65rem}
+  #trainingPage > section:nth-of-type(2) .actions button{font-size:.68rem;padding:6px}
+}
+@media (max-width:759px) and (orientation:portrait){
+  #trainingPage{display:block}
+  #trainingPage .rotate-note{display:block}
+}
+
 </style>
 </head>
 <body>
 <header><button id="backToSetup" class="back-btn" hidden>Naam / datum</button><h1>🎯 Piramide Training</h1><p>Offline schutterstraining · scores lokaal opgeslagen</p></header>
-<section id="setupPage" class="setup-page"><div class="panel"><h2>Start je training</h2><p class="small">Vul eerst je naam en trainingsdatum in. Draai je telefoon daarna een kwartslag voor een overzichtelijke trainingsweergave.</p><section class="panel">
+<section id="setupPage" class="setup-page"><div class="panel"><h2>Start je training</h2><p class="small">Vul je schutterprofiel, trainingsnaam en datum in. Daarna opent de trainingspagina met de piramide en scoreknoppen naast elkaar.</p><section class="panel">
 <h2>Training instellen</h2>
 <div class="two" style="margin-bottom:10px">
  <div><label for="shooter">Schutterprofiel</label><select id="shooter" style="font:inherit;border:1px solid #d2dbd0;border-radius:9px;padding:10px;width:100%;background:#fff"></select></div>
