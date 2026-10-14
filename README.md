@@ -1,0 +1,2 @@
+# schutterstrainingsapp
+Mijn offline schutterstrainingsapp
