@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14251e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.webmanifest"><title>Piramide Training</title>
+<style>
+:root{--bg:#f4f5f0;--ink:#1e2b25;--muted:#65736a;--green:#cfe4bf;--green-dark:#315b36;--cream:#fff1c9;--blue:#d9dafa;--red:#f8d9d5;--line:#26352d;--panel:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#14251e;color:#fff;padding:18px 16px 15px;position:sticky;top:0;z-index:4;box-shadow:0 2px 8px #0002}
+h1{font-size:1.25rem;margin:0 0 4px}header p{margin:0;color:#d5e2d9;font-size:.88rem}
+main{max-width:1000px;margin:auto;padding:14px;display:grid;gap:14px}
+.panel{background:var(--panel);border-radius:16px;padding:15px;box-shadow:0 2px 8px #1b32250b;border:1px solid #e2e8df}
+h2{font-size:1.05rem;margin:0 0 12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#f0f3ed;border-radius:12px;padding:10px}.stat b{font-size:1.35rem;display:block}.stat span{font-size:.76rem;color:var(--muted)}
+.pyramid-wrap{overflow-x:auto;padding-bottom:5px}
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:300px}
+.level{display:flex;gap:4px;justify-content:center;width:100%}
+.cell{border:1px solid #68766c;border-radius:5px;min-width:0;flex:1;max-width:64px;aspect-ratio:1.05;display:flex;align-items:center;justify-content:center;font-weight:750;font-size:clamp(.72rem,2.5vw,1rem);background:var(--cream);position:relative}
+.cell.done{background:var(--green);color:var(--green-dark);border-color:#80a76e}
+.cell.active{outline:3px solid #2d6b49;outline-offset:1px;z-index:1}
+.cell .check{font-size:1.2rem}.cell .req{position:absolute;bottom:2px;right:3px;font-size:.55rem;opacity:.7;font-weight:500}
+.level-label{display:flex;align-items:center;justify-content:center;gap:5px;font-size:.75rem;color:var(--muted);margin-bottom:3px}
+.pyramid-row{display:flex;align-items:center;gap:5px;width:100%;max-width:700px}
+.pyramid-row .rowname{width:42px;text-align:right;font-weight:700;font-size:.8rem;flex-shrink:0}
+.pyramid-row .level{flex:1}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin-top:10px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.scores{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.scorebtn{border:1px solid #d1d9d0;border-radius:12px;padding:13px 4px;font-size:1.02rem;font-weight:750;background:#fff;min-height:52px;color:var(--ink);touch-action:manipulation}
+.scorebtn.orange{background:#f4a51c;color:#fff;border-color:#db8d00}.scorebtn.green{background:#75a85c;color:#fff;border-color:#5d8d48}
+.scorebtn:active,.primary:active{transform:scale(.98)}
+.scorebtn:disabled{opacity:.35}
+.primary,.secondary,.danger{border:0;border-radius:10px;padding:12px 14px;font-weight:700;font-size:.95rem;cursor:pointer}
+.primary{background:#245c3c;color:#fff}.secondary{background:#e9eee7;color:var(--ink)}.danger{background:#f8e3e0;color:#873c34}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.status{border-radius:12px;padding:11px 12px;background:#edf4e9;margin-bottom:12px;font-size:.92rem}
+.status.warn{background:#fff0dc}.status.done{background:#dcefd8}
+.small{font-size:.8rem;color:var(--muted);line-height:1.45}
+.progress{height:8px;background:#e6ebe3;border-radius:99px;overflow:hidden;margin:10px 0}.progress div{height:100%;background:#5f9855;width:0}
+.log{display:grid;gap:7px}.logitem{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;background:#f5f7f2;border-radius:9px;font-size:.88rem}.logitem strong{font-size:1rem}
+input{font:inherit;border:1px solid #d2dbd0;border-radius:9px;padding:10px;width:100%;background:#fff}
+label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+footer{text-align:center;color:var(--muted);font-size:.75rem;padding:0 15px 22px}
+@media(min-width:760px){main{grid-template-columns:1.2fr .8fr;align-items:start}.wide{grid-column:1/-1}.scores{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header><h1>🎯 Piramide Training</h1><p>Offline schutterstraining · scores lokaal opgeslagen</p></header>
+<main>
+<section class="panel">
+<h2>Jouw piramide</h2>
+<div class="stats">
+ <div class="stat"><b id="filled">0/45</b><span>vakken gehaald</span></div>
+ <div class="stat"><b id="misses">0</b><span>missers totaal</span></div>
+ <div class="stat"><b id="layer">1/9</b><span>huidige laag</span></div>
+</div>
+<div class="stats" style="margin-top:8px">
+ <div class="stat"><b id="scoreTotal">0,0</b><span>totaalscore</span></div>
+ <div class="stat"><b id="shotsCount">0</b><span>schoten ingevoerd</span></div>
+ <div class="stat"><b id="tensCount">0</b><span>blokken van 10</span></div>
+</div>
+<div class="progress"><div id="progress"></div></div>
+<div class="pyramid-wrap"><div class="pyramid" id="pyramid"></div></div>
+<div class="legend"><span><i class="dot" style="background:var(--green)"></i>Gehaald</span><span><i class="dot" style="background:var(--cream)"></i>Nog te halen</span><span><i class="dot" style="background:#d9dafa"></i>Huidige laag</span></div>
+<p class="small">Werk van onder naar boven. Een vak is gehaald bij de minimale score of hoger. Je kunt pas verder als alle vakken in de laag gehaald zijn.</p>
+</section>
+<section class="panel">
+<h2>Training instellen</h2>
+<div class="two" style="margin-bottom:10px">
+ <div><label for="shooter">Schutterprofiel</label><select id="shooter" style="font:inherit;border:1px solid #d2dbd0;border-radius:9px;padding:10px;width:100%;background:#fff"></select></div>
+ <div><label for="newShooter">Nieuw profiel</label><div style="display:flex;gap:5px"><input id="newShooter" placeholder="Naam" maxlength="40"><button class="secondary" id="addShooter">+</button></div></div>
+</div>
+<div class="two" style="margin-bottom:10px">
+ <div><label for="session">Naam training</label><input id="session" placeholder="Bijv. woensdagavond" maxlength="50"></div>
+ <div><label for="sessionDate">Datum</label><input id="sessionDate" type="date"></div>
+</div>
+<div class="actions"><button class="primary" id="newSession">Start nieuwe training</button><button class="secondary" id="saveSession">Training opslaan</button></div>
+<p class="small">Kies een schutter en geef iedere training een naam en datum. Opgeslagen trainingen kun je later terugvinden.</p>
+</section>
+<section class="panel">
+<h2>Score invoeren</h2>
+<div id="status" class="status">Kies een score voor het eerste open vak.</div>
+<div id="gameover" class="status warn" hidden>
+ <strong>Je bent af volgens de misserslimiet.</strong>
+ <p class="small" id="gameoverText"></p>
+ <div class="actions"><button class="primary" id="continueGame">Toch doorgaan</button><button class="secondary" id="stopGame">Training beëindigen</button></div>
+</div>
+<div class="scores" id="scores"></div>
+<div class="actions"><button class="secondary" id="undo">Laatste invoer ongedaan</button><button class="secondary" id="export">Exporteer resultaat</button></div>
+<p class="small">Een score onder de eis telt als misser en blijft als poging geregistreerd. Voor deze eerste versie zijn er per laag maximaal 6 extra pogingen beschikbaar; we kunnen deze regel aanpassen als jouw Excel iets anders bedoelt.</p>
+</section>
+<section class="panel wide">
+<h2>Pogingen naast de piramide</h2>
+<p class="small">Mislukte pogingen per laag. De teller loopt op bij elke score onder de minimumscore van het actieve vak.</p>
+<div id="misslist" class="log"></div>
+</section>
+<section class="panel wide">
+<h2>Oefeningen</h2>
+<label for="exercise">Kies trainingsdoel</label>
+<select id="exercise" style="font:inherit;border:1px solid #d2dbd0;border-radius:9px;padding:12px;width:100%;background:#fff">
+<option value="pyramid">Piramidetraining (beschikbaar)</option>
+<option value="precision" disabled>Precisietraining (volgt later)</option>
+<option value="consistency" disabled>Constantheidstraining (volgt later)</option>
+<option value="custom" disabled>Eigen oefening (volgt later)</option>
+</select>
+<p class="small">Het keuzemenu staat klaar om later extra oefeningen toe te voegen. Voor nu is de piramideoefening actief.</p>
+</section>
+<section class="panel wide">
+<h2>Opgeslagen trainingen</h2>
+<div id="savedSessions" class="log"><p class="small">Nog geen opgeslagen trainingen.</p></div>
+<div class="actions"><button class="secondary" id="exportAll">Exporteer alle gegevens</button><label class="secondary" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input id="importFile" type="file" accept=".json,application/json" style="width:auto">Importeer back-up</label></div>
+<p class="small">Export/import kan dienen als eenvoudige handmatige overdracht tussen apparaten. Automatische synchronisatie via internet is nog niet ingebouwd.</p>
+</section>
+<section class="panel wide">
+<h2>Trainingslog</h2><div id="history" class="log"><p class="small">Nog geen scores ingevoerd.</p></div>
+<div class="actions"><button class="danger" id="reset">Nieuwe training / alles wissen</button></div>
+<p class="small">De gegevens blijven op dit apparaat bewaard, ook als je de app sluit. Gebruik ‘Exporteer resultaat’ om een kopie te bewaren of te delen.</p>
+</section>
+</main>
+<footer>Prototype v1 · lokaal opgeslagen op dit apparaat · geen account of internet nodig na openen</footer>
+<script>
+const KEY='piramide-training-v1';
+const scoresAvailable=[]; for(let n=90;n<=109;n++) scoresAvailable.push(n/10);
+let state={shooter:'',session:'',sessionDate:'',entries:[],missesByLayer:Array(9).fill(0),currentLayer:0,gameOver:false,continueAfterLimit:false,ended:false,createdAt:new Date().toISOString()};
+let profiles=[];
+let savedSessions=[];
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));if(x){if(x.state)state={...state,...x.state};else if(Array.isArray(x.entries))state={...state,...x};profiles=Array.isArray(x.profiles)?x.profiles:[];savedSessions=Array.isArray(x.savedSessions)?x.savedSessions:[];}}catch(e){}if(!profiles.length)profiles=[{id:'default',name:'Schutter 1'}];if(!state.shooter)state.shooter=profiles[0].id;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({state,profiles,savedSessions}));}catch(e){alert('Opslaan lukt niet in deze browser. Exporteer regelmatig een kopie.');}}
+function profileName(id){const p=profiles.find(p=>p.id===id);return p?p.name:'Onbekende schutter';}
+function renderProfiles(){const sel=document.getElementById('shooter');if(!sel)return;sel.innerHTML='';profiles.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o)});sel.value=state.shooter||profiles[0]?.id||'';}
+function saveCurrentSession(){if(!state.entries.length){alert('Voer eerst scores in voordat je de training opslaat.');return;}const record={id:Date.now().toString(),shooter:state.shooter,shooterName:profileName(state.shooter),name:state.session||'Training',date:state.sessionDate||new Date().toISOString().slice(0,10),entries:[...state.entries],missesByLayer:[...state.missesByLayer],totalScore:+totalScore().toFixed(1),shots:state.entries.length,createdAt:state.createdAt};savedSessions.unshift(record);save();renderSavedSessions();alert('Training opgeslagen.');}
+function renderSavedSessions(){const root=document.getElementById('savedSessions');if(!root)return;root.innerHTML='';if(!savedSessions.length){root.innerHTML='<p class="small">Nog geen opgeslagen trainingen.</p>';return;}savedSessions.forEach(s=>{const d=document.createElement('div');d.className='logitem';const left=document.createElement('span');left.textContent=(s.date||'')+' · '+(s.shooterName||profileName(s.shooter))+' · '+(s.name||'Training');const right=document.createElement('strong');right.textContent=fmt(s.totalScore||0)+' punten';d.append(left,right);root.appendChild(d);});}
+function required(layer){return +(10.1+layer*.1).toFixed(1)}
+function missLimit(layer){return 6+layer}
+function totalScore(){return state.entries.reduce((sum,e)=>sum+Number(e.score||0),0)}
+function passedCount(){return state.entries.filter(e=>e.passed).length}
+function countLayer(layer){return state.entries.filter(e=>e.layer===layer&&e.passed).length}
+function nextLayer(){for(let l=0;l<9;l++){if(countLayer(l)<9-l)return l;}return 9}
+function nextSlot(layer){const used=state.entries.filter(e=>e.layer===layer&&e.passed).map(e=>e.slot);for(let s=0;s<9-layer;s++)if(!used.includes(s))return s;return -1}
+function active(){const l=nextLayer();if(l>=9)return null;return {layer:l,slot:nextSlot(l),minimum:required(l)}}
+function fmt(v){return Number(v).toFixed(1).replace('.',',')}
+function renderPyramid(){
+ const root=document.getElementById('pyramid');root.innerHTML='';
+ for(let l=8;l>=0;l--){
+  const row=document.createElement('div');row.className='pyramid-row';
+  const name=document.createElement('div');name.className='rowname';name.textContent=fmt(required(l));row.appendChild(name);
+  const cells=document.createElement('div');cells.className='level';
+  for(let s=0;s<9-l;s++){
+   const entry=state.entries.find(e=>e.layer===l&&e.slot===s&&e.passed);
+   const a=active();const isActive=a&&a.layer===l&&a.slot===s;
+   const cell=document.createElement('div');cell.className='cell'+(entry?' done':'')+(isActive?' active':'');
+   cell.innerHTML=entry?'<span class="check">✓</span>':'<span>'+ (s+1) +'</span>';
+   const req=document.createElement('span');req.className='req';req.textContent=entry?fmt(entry.score):'';cell.appendChild(req);
+   cell.title='Minimaal '+fmt(required(l));cells.appendChild(cell);
+  }
+  row.appendChild(cells);root.appendChild(row);
+ }
+}
+function renderScores(){
+ const root=document.getElementById('scores');root.innerHTML='';
+ scoresAvailable.forEach(v=>{
+  const b=document.createElement('button');b.className='scorebtn '+(v<10?'orange':(v>=10.1?'green':''));b.textContent=fmt(v);
+  b.onclick=()=>addScore(v);root.appendChild(b);
+ });
+}
+function addScore(score){
+ const a=active();if(!a){alert('Piramide voltooid!');return}
+ if(state.ended){alert('Deze training is beëindigd. Kies “Nieuwe training” om opnieuw te beginnen.');return}
+ if(state.gameOver && !state.continueAfterLimit)return;
+ const passed=score>=a.minimum;
+ const entry={id:Date.now()+'-'+Math.random().toString(16).slice(2),score,passed,layer:a.layer,slot:a.slot,minimum:a.minimum,time:new Date().toISOString()};
+ state.entries.push(entry);
+ if(!passed){
+   state.missesByLayer[a.layer]++;
+   if(state.missesByLayer[a.layer]>=missLimit(a.layer)){
+     state.gameOver=true;
+     state.continueAfterLimit=false;
+   }
+ }
+ state.shooter=document.getElementById('shooter').value;state.session=document.getElementById('session').value;state.sessionDate=document.getElementById('sessionDate').value;
+ save();render();
+}
+function render(){
+ const a=active();const passed=state.entries.filter(e=>e.passed).length;const misses=state.entries.filter(e=>!e.passed).length;
+ document.getElementById('filled').textContent=passed+'/45';document.getElementById('misses').textContent=misses;
+ document.getElementById('layer').textContent=a?(a.layer+1)+'/9':'Voltooid';
+ document.getElementById('scoreTotal').textContent=fmt(totalScore());
+ document.getElementById('shotsCount').textContent=state.entries.length;
+ document.getElementById('tensCount').textContent=Math.floor(state.entries.length/10);
+ document.getElementById('progress').style.width=(passed/45*100)+'%';
+ const status=document.getElementById('status');
+ if(!a){status.className='status done';status.textContent='Piramide voltooid! Alle 45 vakken zijn gehaald.';}
+ else {const got=countLayer(a.layer),total=9-a.layer;status.className='status'+(state.missesByLayer[a.layer]>=missLimit(a.layer)?' warn':'');status.innerHTML='<strong>Laag '+(a.layer+1)+' · minimaal '+fmt(a.minimum)+'</strong><br>Vakken gehaald: '+got+' van '+total+'<br>Volgende score wordt gekoppeld aan vak '+(a.slot+1)+'. Missers: '+state.missesByLayer[a.layer]+' van maximaal '+missLimit(a.layer)+'.';}
+ const over=document.getElementById('gameover');
+ over.hidden=!(state.gameOver && !state.continueAfterLimit && !state.ended);
+ if(!over.hidden)document.getElementById('gameoverText').textContent='De misserslimiet van '+missLimit(Math.min(a?a.layer:8,8))+' is bereikt. Je kunt de training beëindigen of bewust toch doorgaan.';
+ document.querySelectorAll('.scorebtn').forEach(b=>b.disabled=state.ended || (state.gameOver&&!state.continueAfterLimit) || !a);
+ renderPyramid();
+ const ml=document.getElementById('misslist');ml.innerHTML='';
+ for(let l=0;l<9;l++){const div=document.createElement('div');div.className='logitem';div.innerHTML='<span>Laag '+(l+1)+' · minimaal '+fmt(required(l))+'</span><strong>'+state.missesByLayer[l]+' / '+missLimit(l)+' missers</strong>';ml.appendChild(div);}
+ const h=document.getElementById('history');h.innerHTML='';
+ if(!state.entries.length)h.innerHTML='<p class="small">Nog geen scores ingevoerd.</p>';
+ [...state.entries].reverse().slice(0,30).forEach((e,i)=>{const d=document.createElement('div');d.className='logitem';d.innerHTML='<span>'+(e.passed?'✓ Gehaald':'✕ Misser')+' · laag '+(e.layer+1)+' · eis '+fmt(e.minimum)+'<br><span class="small">'+new Date(e.time).toLocaleString('nl-NL')+'</span></span><strong>'+fmt(e.score)+'</strong>';h.appendChild(d);});
+ document.getElementById('session').value=state.session||'';document.getElementById('sessionDate').value=state.sessionDate||new Date().toISOString().slice(0,10);
+}
+document.getElementById('undo').onclick=()=>{if(!state.entries.length)return;const e=state.entries.pop();if(!e.passed)state.missesByLayer[e.layer]=Math.max(0,state.missesByLayer[e.layer]-1);state.gameOver=false;state.continueAfterLimit=false;state.ended=false;save();render();};
+document.getElementById('continueGame').onclick=()=>{state.continueAfterLimit=true;state.gameOver=false;save();render();};
+document.getElementById('stopGame').onclick=()=>{state.ended=true;save();render();document.getElementById('status').textContent='Training beëindigd. Je resultaten zijn bewaard.';};
+document.getElementById('reset').onclick=()=>{if(confirm('Weet je zeker dat je alle scores van deze training wilt wissen?')){state={shooter:state.shooter,session:'',entries:[],missesByLayer:Array(9).fill(0),currentLayer:0,gameOver:false,continueAfterLimit:false,ended:false,createdAt:new Date().toISOString()};save();render();}};
+document.getElementById('export').onclick=()=>{const exportState={state,profiles,savedSessions,summary:{totalScore:+totalScore().toFixed(1),shots:state.entries.length,blocksOfTen:Math.floor(state.entries.length/10),misses:state.entries.filter(e=>!e.passed).length,passed:passedCount()}};const blob=new Blob([JSON.stringify(exportState,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='piramide-training-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);};
+document.getElementById('shooter').addEventListener('change',e=>{state.shooter=e.target.value;save()});
+document.getElementById('session').addEventListener('change',e=>{state.session=e.target.value;save()});
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});load();renderScores();render();
+</script>
+</body></html>
