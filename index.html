@@ -20,10 +20,10 @@ h2{font-size:1.05rem;margin:0 0 12px}
 .pyramid-wrap{overflow-x:auto;padding-bottom:5px}
 .pyramid{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:300px}
 .level{display:flex;gap:4px;justify-content:center;width:100%}
-.cell{border:1px solid #68766c;border-radius:5px;min-width:0;flex:1;max-width:64px;aspect-ratio:1.05;display:flex;align-items:center;justify-content:center;font-weight:750;font-size:clamp(.72rem,2.5vw,1rem);background:var(--cream);position:relative}
+.cell{border:1px solid #68766c;border-radius:5px;min-width:0;flex:1;max-width:72px;aspect-ratio:1.05;display:flex;align-items:center;justify-content:center;font-weight:750;font-size:clamp(.72rem,2.5vw,1rem);background:var(--cream);position:relative}
 .cell.done{background:var(--green);color:var(--green-dark);border-color:#80a76e}
 .cell.active{outline:3px solid #2d6b49;outline-offset:1px;z-index:1}
-.cell .check{font-size:1.2rem}.cell .req{position:absolute;bottom:2px;right:3px;font-size:.55rem;opacity:.7;font-weight:500}
+.cell .cell-score{font-size:clamp(.72rem,2.4vw,1rem);font-weight:800}.cell .cell-number{font-size:.82rem;color:#7b857d}
 .level-label{display:flex;align-items:center;justify-content:center;gap:5px;font-size:.75rem;color:var(--muted);margin-bottom:3px}
 .pyramid-row{display:flex;align-items:center;gap:5px;width:100%;max-width:700px}
 .pyramid-row .rowname{width:42px;text-align:right;font-weight:700;font-size:.8rem;flex-shrink:0}
@@ -155,8 +155,10 @@ function renderPyramid(){
    const entry=state.entries.find(e=>e.layer===l&&e.slot===s&&e.passed);
    const a=active();const isActive=a&&a.layer===l&&a.slot===s;
    const cell=document.createElement('div');cell.className='cell'+(entry?' done':'')+(isActive?' active':'');
-   cell.innerHTML=entry?'<span class="check">✓</span>':'<span>'+ (s+1) +'</span>';
-   const req=document.createElement('span');req.className='req';req.textContent=entry?fmt(entry.score):'';cell.appendChild(req);
+   cell.innerHTML=entry?'<span class="cell-score">'+fmt(entry.score)+'</span>':'<span class="cell-number">'+(s+1)+'</span>';
+   cell.setAttribute('aria-label',entry?'Score '+fmt(entry.score):'Positie '+(s+1)+', vereist '+fmt(required(l)));
+   if(entry) cell.title='Behaald: '+fmt(entry.score)+' · minimum '+fmt(required(l));
+   else cell.title='Positie '+(s+1)+' · minimaal '+fmt(required(l));
    cell.title='Minimaal '+fmt(required(l));cells.appendChild(cell);
   }
   row.appendChild(cells);root.appendChild(row);
