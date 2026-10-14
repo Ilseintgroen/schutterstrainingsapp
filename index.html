@@ -9,7 +9,7 @@
 <link rel="manifest" href="./manifest.webmanifest"><title>Piramide Training</title>
 <style>
 :root{--bg:#f4f5f0;--ink:#1e2b25;--muted:#65736a;--green:#cfe4bf;--green-dark:#315b36;--cream:#fff1c9;--blue:#d9dafa;--red:#f8d9d5;--line:#26352d;--panel:#fff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+[hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 header{background:#14251e;color:#fff;padding:18px 16px 15px;position:sticky;top:0;z-index:4;box-shadow:0 2px 8px #0002}
 h1{font-size:1.25rem;margin:0 0 4px}header p{margin:0;color:#d5e2d9;font-size:.88rem}
 main{max-width:1000px;margin:auto;padding:14px;display:grid;gap:14px}
@@ -46,13 +46,29 @@ h2{font-size:1.05rem;margin:0 0 12px}
 input{font:inherit;border:1px solid #d2dbd0;border-radius:9px;padding:10px;width:100%;background:#fff}
 label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:4px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.setup-page{max-width:560px;margin:18px auto;padding:14px}.setup-page .panel{padding:20px}.setup-page h2{font-size:1.2rem}.start-btn{width:100%;min-height:54px;font-size:1.05rem;margin-top:12px}.rotate-note{display:none;color:var(--muted);font-size:.85rem;margin-top:10px}.back-btn{float:right;background:#315b36;color:white;border:0;border-radius:9px;padding:8px 10px;font-weight:700}
+@media (max-width:759px) and (orientation:landscape){header{padding:7px 12px}header h1{font-size:1rem}header p{display:none}main{padding:8px;gap:8px;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:start}.panel{padding:9px;border-radius:10px}h2{font-size:.9rem;margin-bottom:6px}.stats{gap:4px}.stat{padding:5px}.stat b{font-size:1rem}.stat span{font-size:.65rem}.progress{margin:5px 0}.pyramid{gap:2px;min-width:0}.pyramid-row{gap:3px}.pyramid-row .rowname{width:30px;font-size:.65rem}.level{gap:2px}.cell{max-width:none;aspect-ratio:1.45;font-size:clamp(.7rem,2.2vh,1.05rem)}.cell .req{font-size:.48rem}.scores{grid-template-columns:repeat(5,1fr);gap:5px}.scorebtn{min-height:39px;padding:6px 2px;font-size:.9rem;border-radius:8px}.actions{gap:5px;margin-top:6px}.primary,.secondary,.danger{padding:8px;font-size:.78rem}.status{padding:7px;margin-bottom:6px;font-size:.8rem}.legend,.small{font-size:.68rem}.wide{grid-column:1/-1}.panel:has(#misslist),.panel:has(#history),.panel:has(#savedSessions),.panel:has(#exercise){grid-column:1/-1}}
+@media (max-width:759px) and (orientation:portrait){.rotate-note{display:block}}
 footer{text-align:center;color:var(--muted);font-size:.75rem;padding:0 15px 22px}
 @media(min-width:760px){main{grid-template-columns:1.2fr .8fr;align-items:start}.wide{grid-column:1/-1}.scores{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
-<header><h1>🎯 Piramide Training</h1><p>Offline schutterstraining · scores lokaal opgeslagen</p></header>
-<main>
+<header><button id="backToSetup" class="back-btn" hidden>Naam / datum</button><h1>🎯 Piramide Training</h1><p>Offline schutterstraining · scores lokaal opgeslagen</p></header>
+<section id="setupPage" class="setup-page"><div class="panel"><h2>Start je training</h2><p class="small">Vul eerst je naam en trainingsdatum in. Draai je telefoon daarna een kwartslag voor een overzichtelijke trainingsweergave.</p><section class="panel">
+<h2>Training instellen</h2>
+<div class="two" style="margin-bottom:10px">
+ <div><label for="shooter">Schutterprofiel</label><select id="shooter" style="font:inherit;border:1px solid #d2dbd0;border-radius:9px;padding:10px;width:100%;background:#fff"></select></div>
+ <div><label for="newShooter">Nieuw profiel</label><div style="display:flex;gap:5px"><input id="newShooter" placeholder="Naam" maxlength="40"><button class="secondary" id="addShooter">+</button></div></div>
+</div>
+<div class="two" style="margin-bottom:10px">
+ <div><label for="session">Naam training</label><input id="session" placeholder="Bijv. woensdagavond" maxlength="50"></div>
+ <div><label for="sessionDate">Datum</label><input id="sessionDate" type="date"></div>
+</div>
+<div class="actions"><button class="primary" id="newSession">Start nieuwe training</button><button class="secondary" id="saveSession">Training opslaan</button></div>
+<p class="small">Kies een schutter en geef iedere training een naam en datum. Opgeslagen trainingen kun je later terugvinden.</p>
+</section><button id="startTraining" class="primary start-btn">Naar de piramide →</button><p class="rotate-note">Tip: draai je telefoon naar de liggende stand om de piramide en scoreknoppen tegelijk te zien.</p></div></section>
+<main id="trainingPage" hidden>
 <section class="panel">
 <h2>Jouw piramide</h2>
 <div class="stats">
@@ -70,19 +86,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:0 15px 22px
 <div class="legend"><span><i class="dot" style="background:var(--green)"></i>Gehaald</span><span><i class="dot" style="background:var(--cream)"></i>Nog te halen</span><span><i class="dot" style="background:#d9dafa"></i>Huidige laag</span></div>
 <p class="small">Werk van onder naar boven. Een vak is gehaald bij de minimale score of hoger. Je kunt pas verder als alle vakken in de laag gehaald zijn.</p>
 </section>
-<section class="panel">
-<h2>Training instellen</h2>
-<div class="two" style="margin-bottom:10px">
- <div><label for="shooter">Schutterprofiel</label><select id="shooter" style="font:inherit;border:1px solid #d2dbd0;border-radius:9px;padding:10px;width:100%;background:#fff"></select></div>
- <div><label for="newShooter">Nieuw profiel</label><div style="display:flex;gap:5px"><input id="newShooter" placeholder="Naam" maxlength="40"><button class="secondary" id="addShooter">+</button></div></div>
-</div>
-<div class="two" style="margin-bottom:10px">
- <div><label for="session">Naam training</label><input id="session" placeholder="Bijv. woensdagavond" maxlength="50"></div>
- <div><label for="sessionDate">Datum</label><input id="sessionDate" type="date"></div>
-</div>
-<div class="actions"><button class="primary" id="newSession">Start nieuwe training</button><button class="secondary" id="saveSession">Training opslaan</button></div>
-<p class="small">Kies een schutter en geef iedere training een naam en datum. Opgeslagen trainingen kun je later terugvinden.</p>
-</section>
+
 <section class="panel">
 <h2>Score invoeren</h2>
 <div id="status" class="status">Kies een score voor het eerste open vak.</div>
@@ -218,6 +222,8 @@ document.getElementById('reset').onclick=()=>{if(confirm('Weet je zeker dat je a
 document.getElementById('export').onclick=()=>{const exportState={state,profiles,savedSessions,summary:{totalScore:+totalScore().toFixed(1),shots:state.entries.length,blocksOfTen:Math.floor(state.entries.length/10),misses:state.entries.filter(e=>!e.passed).length,passed:passedCount()}};const blob=new Blob([JSON.stringify(exportState,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='piramide-training-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);};
 document.getElementById('shooter').addEventListener('change',e=>{state.shooter=e.target.value;save()});
 document.getElementById('session').addEventListener('change',e=>{state.session=e.target.value;save()});
+document.getElementById('startTraining').onclick=()=>{state.shooter=document.getElementById('shooter').value;state.session=document.getElementById('session').value;state.sessionDate=document.getElementById('sessionDate').value;save();document.getElementById('setupPage').hidden=true;document.getElementById('trainingPage').hidden=false;document.getElementById('backToSetup').hidden=false;render();if(screen.orientation&&screen.orientation.lock){screen.orientation.lock('landscape').catch(()=>{});}window.scrollTo(0,0);};
+document.getElementById('backToSetup').onclick=()=>{document.getElementById('trainingPage').hidden=true;document.getElementById('setupPage').hidden=false;document.getElementById('backToSetup').hidden=true; if(screen.orientation&&screen.orientation.unlock){try{screen.orientation.unlock()}catch(e){}}window.scrollTo(0,0);};
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});load();renderScores();render();
 </script>
 </body></html>
